@@ -1,0 +1,85 @@
+<?php 
+// Задание 1
+// Расширить класс Walker_Nav_Menu для создания своей разметки навигационного меню,
+// например, вместо стандартного ul>li>a, вывести элементы меню в виде div>a
+// (все пункты меню (<a>) должны находиться в одном единственном контейнере (<div>)
+
+
+
+// Для изменения разметки меню, необходимо расширить класс Walker_Nav_Menu, 
+// создав свой собственный класс, который будет наследоваться от Walker_Nav_Menu:
+
+class Custom_Walker_Nav_Menu extends Walker_Nav_Menu {
+    // Переопределение метода start_lvl для вывода начального уровня разметки
+    public function start_lvl( &$output, $depth = 0, $args = array() ) {
+        $indent = str_repeat( "\t", $depth );
+        $output .= "\n$indent<div class=\"sub-menu\">\n";
+    }
+
+    // Переопределение метода end_lvl для вывода конечного уровня разметки
+    public function end_lvl( &$output, $depth = 0, $args = array() ) {
+        $indent = str_repeat( "\t", $depth );
+        $output .= "$indent</div>\n";
+    }
+
+//После того, как был создан собственный класс, его необходимо использовать при регистрации меню в functions.php темы:
+
+// Регистрация меню с использованием созданного класса Custom_Walker_Nav_Menu
+function custom_theme_setup() {
+    register_nav_menus( array(
+        'primary-menu' => esc_html__( 'Primary Menu', 'text-domain' ),
+    ) );
+}
+add_action( 'after_setup_theme', 'custom_theme_setup' );
+
+// Далее необходимо вывести меню на странице с использованием wp_nav_menu и Custom_Walker_Nav_Menu
+wp_nav_menu( array(
+    'theme_location' => 'primary-menu',
+    'walker' => new Custom_Walker_Nav_Menu(),
+) );
+
+
+
+// Задание 2
+// Зарегистрировать свой тип записи, который будет иметь:
+// - публичный URL для использования с ЧПУ;
+// - возможность создавать свои таксономии;
+// - выводить в админке при создании нового типа записи только поля заголовка и контента.
+
+
+// Регистрация типа записи
+function custom_post_type() {
+    $args = array(
+        'labels' => array(
+            'name' => 'Название типа записи',
+            'singular_name' => 'Тип записи',
+        ),
+        'public' => true,
+        'has_archive' => true,
+        'rewrite' => array('slug' => 'custom-post'),
+        'supports' => array('title', 'editor'),
+        'taxonomies' => array('custom_taxonomy'),
+    );
+    register_post_type('custom_post', $args);
+}
+add_action('init', 'custom_post_type');
+
+// Регистрация своей таксономии
+function custom_taxonomy() {
+    $args = array(
+        'labels' => array(
+            'name' => 'Название таксономии',
+            'singular_name' => 'Таксономия',
+        ),
+        'public' => true,
+        'hierarchical' => true,
+    );
+    register_taxonomy('custom_taxonomy', 'custom_post', $args);
+}
+add_action('init', 'custom_taxonomy');
+
+// В файл functions.php добавляем данный код.
+// Будет создан новый тип записи с именем 'custom_post', 
+// с публичным URL с ЧПУ и это даст возможность создавать 
+// собственные таксономии 'custom_taxonomy', при этом будет отображено только поле  
+// заголовка и контента при создании нового элемента. 
