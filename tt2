@@ -21,7 +21,7 @@ class Custom_Walker_Nav_Menu extends Walker_Nav_Menu {
         $indent = str_repeat( "\t", $depth );
         $output .= "$indent</div>\n";
     }
-
+}
 //После того, как был создан собственный класс, его необходимо использовать при регистрации меню в functions.php темы:
 
 // Регистрация меню с использованием созданного класса Custom_Walker_Nav_Menu
